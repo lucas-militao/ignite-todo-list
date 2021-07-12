@@ -22,11 +22,9 @@ export function Home() {
     const updatedTasks = tasks.map(taskItem => {
       if (taskItem.id === id) {
         taskItem.done = !taskItem.done;
-        return taskItem;
       }
       return taskItem;
     });
-
     setTasks(updatedTasks);
   }
 
