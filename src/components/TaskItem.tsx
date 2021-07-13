@@ -5,18 +5,19 @@ import trashIcon from '../assets/icons/trash/trash.png';
 import editIcon from '../assets/icons/edit/edit.png';
 import cancelIcon from '../assets/icons/x/x.png';
 import { Task } from "./TasksList";
+import { EditTaskProps } from "../pages/Home";
 
 interface TaskItemProps {
   toggleTaskDone: (id: number) => void;
   removeTask: (id: number) => void;
-  editTask: (task: Task) => void;
+  editTask: ({taskId: number, taskNewTitle: string}: EditTaskProps) => void;
   index: number;
   task: Task;
 }
 
 export function TaskItem({ toggleTaskDone, removeTask, editTask, index, task }: TaskItemProps) {
   const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(task.title);
+  const [taskNewTitle, setTaskNewTitle] = useState(task.title);
   const textInputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -32,18 +33,12 @@ export function TaskItem({ toggleTaskDone, removeTask, editTask, index, task }: 
   }
 
   function handleCancelEditing() {
-    setTitle(task.title);
+    setTaskNewTitle(task.title);
     setEditing(false);
   }
 
   function handleSubmitEditing() {
-    const editedTask = {
-      id: task.id,
-      title: title,
-      done: task.done
-    }
-
-    editTask(editedTask);
+    editTask({ taskId: task.id, taskNewTitle: taskNewTitle});
     setEditing(false);
   }
 
@@ -70,11 +65,11 @@ export function TaskItem({ toggleTaskDone, removeTask, editTask, index, task }: 
           </View>
 
           <TextInput 
-            style={[(task.done) ? styles.taskTextDone : styles.taskText, styles.inputText]}
-            value={title}
+            style={(task.done) ? styles.taskTextDone : styles.taskText}
+            value={taskNewTitle}
             editable={editing}
             onSubmitEditing={handleSubmitEditing}
-            onChangeText={setTitle}
+            onChangeText={setTaskNewTitle}
             ref={textInputRef}
           />
         </TouchableOpacity>
@@ -83,34 +78,35 @@ export function TaskItem({ toggleTaskDone, removeTask, editTask, index, task }: 
       <View style={styles.buttonsContainer}>
         {
           editing
-          ? <TouchableOpacity
+          ?          
+            <TouchableOpacity
               testID={`cancel-${index}`}
-              style={{ paddingHorizontal: 24 }}
+              style={{ paddingHorizontal: 18 }}
               onPress={handleCancelEditing}
             >
               <Image source={cancelIcon} style={{height: 13, width: 17}}/>
-            </TouchableOpacity> 
-
-          : <>
-              <TouchableOpacity
-                testID={`edit-${index}`}
-                style={{ paddingHorizontal: 18 }}
-                onPress={handleStartEditing}
-              >
-                <Image source={editIcon} style={styles.icon}/>
-              </TouchableOpacity>
-
-              <View style={styles.divisor}/>
-
-              <TouchableOpacity
-                testID={`trash-${index}`}
-                style={{ paddingHorizontal: 18 }}
-                onPress={() => removeTask(task.id)}
-              >
-                <Image source={trashIcon} style={styles.icon}/>
-              </TouchableOpacity>
-            </>
+            </TouchableOpacity>
+          :
+            <TouchableOpacity
+              testID={`edit-${index}`}
+              style={{ paddingHorizontal: 18 }}
+              onPress={handleStartEditing}
+            >
+              <Image source={editIcon} style={styles.icon}/>
+            </TouchableOpacity>
         }
+
+        <View style={styles.divisor}/>
+
+        <TouchableOpacity
+          testID={`trash-${index}`}
+          style={{ paddingHorizontal: 18, 
+            opacity: editing ? 0.2 : 1}}
+          disabled={editing ? true : false}
+          onPress={() => removeTask(task.id)}
+        >
+          <Image source={trashIcon} style={styles.icon}/>
+        </TouchableOpacity>
       </View>
     </>
     
@@ -123,13 +119,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
-  inputText: {
-    height: 48,
-  },
   taskButton: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingVertical: 15,
     marginBottom: 4,
     borderRadius: 4,
     flexDirection: 'row',
@@ -165,6 +157,8 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   divisor: {
     width: 1,

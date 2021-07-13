@@ -5,6 +5,11 @@ import { Header } from '../components/Header';
 import { Task, TasksList } from '../components/TasksList';
 import { TodoInput } from '../components/TodoInput';
 
+export type EditTaskProps = {
+  taskId: number;
+  taskNewTitle: string;
+}
+
 export function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -12,14 +17,13 @@ export function Home() {
     const repeatedTask = tasks.find(taskItem => taskItem.title === newTaskTitle);
 
     if(repeatedTask) {
-      Alert.alert(
+      return Alert.alert(
         "Task já cadastrada",
         "Você não pode cadastrar uma task com o mesmo nome",
         [
           {text: 'OK', onPress: () => {}, style: 'cancel'}
         ]
       );
-      return;
     }
 
     const task: Task = ({
@@ -61,8 +65,16 @@ export function Home() {
     
   }
 
-  function handleEditTask({id: number, title: string}: Task) {
-    //TODO
+  function handleEditTask({taskId, taskNewTitle}: EditTaskProps) {
+    const updatedTasks = tasks.map(task => {
+      if(task.id === taskId) {
+        task.title = taskNewTitle
+      };
+      return task;
+    })
+
+    setTasks(updatedTasks);
+    console.log(tasks);
   }
 
   return (
